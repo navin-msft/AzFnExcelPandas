@@ -1,12 +1,14 @@
-# Azure Function: Excel to Pandas API
+# Azure Function: Excel to Pandas API with Metadata
 
-This project is an Azure Function App (Python v2) that exposes an HTTP endpoint to accept an Excel file, convert it to a pandas DataFrame, and return the data as JSON.
+This project is an Azure Function App (Python v2) that exposes an HTTP endpoint to accept an Excel data file and a metadata file, process the data according to the metadata, and return the result as JSON.
 
 ## Features
 - HTTP-triggered Azure Function
-- Accepts Excel files via POST as the raw body (not form-data)
-- Converts Excel to pandas DataFrame
-- Returns DataFrame as JSON
+- Accepts two files via POST (`multipart/form-data`):
+  - `data_file`: Excel file (`.xlsx`)
+  - `meta_file`: JSON file (e.g., column selection)
+- Uses metadata to interpret/process the data file (e.g., select columns)
+- Returns processed data as JSON
 
 ## Prerequisites
 - [Azure Functions Core Tools](https://learn.microsoft.com/azure/azure-functions/functions-run-local)
@@ -24,40 +26,39 @@ This project is an Azure Function App (Python v2) that exposes an HTTP endpoint 
    ```sh
    func start
    ```
-4. **Test the function:**
-   - Use Postman or curl to POST an Excel file as the raw body with content-type:
-     ```
-     Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
-     ```
-     to:
-     ```
-     http://localhost:7071/api/ExcelToPandas
-     ```
-   - Do not use form-data. The file must be sent as the request body.
 
-## Example Request (using curl)
-```
-curl -X POST "http://localhost:7071/api/ExcelToPandas" \
-  -H "Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" \
-  --data-binary "@yourfile.xlsx"
-```
+## Usage: Upload Data and Metadata Files
+You must send both a data file (Excel) and a metadata file (JSON) in a single request using `multipart/form-data`.
 
-## Example: Testing with the Provided Sample Excel File
-
-A sample Excel file (`sample.xlsx`) is included in this repository. You can use it to test the function immediately after setup.
-
-### Test the Function with the Sample File
+### Example Request (using curl)
 ```sh
 curl -X POST "http://localhost:7071/api/ExcelToPandas" \
-  -H "Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" \
-  --data-binary "@sample.xlsx"
+  -H "Content-Type: multipart/form-data" \
+  -F "data_file=@sample_data.xlsx" \
+  -F "meta_file=@sample_meta.json"
 ```
 
-### Example Output
+### Example Request (using Postman)
+- Set method to POST and URL to `http://localhost:7071/api/ExcelToPandas`
+- In the Body tab, select `form-data`
+- Add two fields:
+  - `data_file`: select your Excel file (e.g., `sample_data.xlsx`)
+  - `meta_file`: select your JSON file (e.g., `sample_meta.json`)
+
+## Sample Files
+- `sample_data.xlsx`: Example Excel file with columns `Name`, `Age`, `City`
+- `sample_meta.json`: Example metadata file:
+  ```json
+  {
+    "columns": ["Name", "City"]
+  }
+  ```
+
+## Example Output
 ```json
 [
-  {"Name": "Alice", "Age": 30},
-  {"Name": "Bob", "Age": 25}
+  {"Name": "Alice", "City": "NY"},
+  {"Name": "Bob", "City": "LA"}
 ]
 ```
 
@@ -75,8 +76,9 @@ curl -X POST "http://localhost:7071/api/ExcelToPandas" \
   ```
 
 ## Notes
-- Only `.xlsx` files are supported (uses `openpyxl`).
-- The response is a JSON array of records from the Excel file.
+- Only `.xlsx` files are supported for data (uses `openpyxl`).
+- The metadata file must be valid JSON. You can extend the metadata logic as needed.
+- The response is a JSON array of records from the Excel file, processed according to the metadata.
 - For large files, consider Azure Blob Storage triggers.
 
 ## Troubleshooting

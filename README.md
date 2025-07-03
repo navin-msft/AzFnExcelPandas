@@ -42,19 +42,9 @@ curl -X POST "http://localhost:7071/api/ExcelToPandas" \
   --data-binary "@yourfile.xlsx"
 ```
 
-## Example: Creating and Testing with a Sample Excel File
+## Example: Testing with the Provided Sample Excel File
 
-You can create a sample Excel file using Python and pandas, then test the function with it.
-
-### Create a Sample Excel File
-```python
-import pandas as pd
-df = pd.DataFrame({
-    'Name': ['Alice', 'Bob'],
-    'Age': [30, 25]
-})
-df.to_excel('sample.xlsx', index=False)
-```
+A sample Excel file (`sample.xlsx`) is included in this repository. You can use it to test the function immediately after setup.
 
 ### Test the Function with the Sample File
 ```sh

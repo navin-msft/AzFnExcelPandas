@@ -42,6 +42,35 @@ curl -X POST "http://localhost:7071/api/ExcelToPandas" \
   --data-binary "@yourfile.xlsx"
 ```
 
+## Example: Creating and Testing with a Sample Excel File
+
+You can create a sample Excel file using Python and pandas, then test the function with it.
+
+### Create a Sample Excel File
+```python
+import pandas as pd
+df = pd.DataFrame({
+    'Name': ['Alice', 'Bob'],
+    'Age': [30, 25]
+})
+df.to_excel('sample.xlsx', index=False)
+```
+
+### Test the Function with the Sample File
+```sh
+curl -X POST "http://localhost:7071/api/ExcelToPandas" \
+  -H "Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" \
+  --data-binary "@sample.xlsx"
+```
+
+### Example Output
+```json
+[
+  {"Name": "Alice", "Age": 30},
+  {"Name": "Bob", "Age": 25}
+]
+```
+
 ## Running and Debugging in Visual Studio Code
 1. Open this project folder in VS Code.
 2. Make sure you have the Azure Functions and Python extensions installed.
